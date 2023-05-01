@@ -1,4 +1,10 @@
 #include "systemcalls.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <libgen.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -9,7 +15,9 @@
 */
 bool do_system(const char *cmd)
 {
-
+    if (system(cmd) != 0) {
+        return false;
+    }
 /*
  * TODO  add your code here
  *  Call the system() function with the command set in the cmd
@@ -44,11 +52,35 @@ bool do_exec(int count, ...)
     {
         command[i] = va_arg(args, char *);
     }
+
     command[count] = NULL;
+
     // this line is to avoid a compile warning before your implementation is complete
     // and may be removed
     command[count] = command[count];
+   
+    int status;
+    pid_t pid;
+    pid = fork();
 
+    if ( pid == -1 ) {
+        return false;
+    }
+    else if ( pid == 0 ) {
+        //execv (command[0], arguments);
+        execv (command[0], command);
+        exit (1);
+    }
+    else
+        waitpid (pid, &status, 0);
+        //wait (&status);
+    //if  == -1 ){
+        
+        if ( WEXITSTATUS (status) == 0 )
+            return true; 
+        else
+            return false;
+ 
 /*
  * TODO:
  *   Execute a system command by calling fork, execv(),
@@ -58,7 +90,6 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
     va_end(args);
 
     return true;
@@ -71,6 +102,7 @@ bool do_exec(int count, ...)
 */
 bool do_exec_redirect(const char *outputfile, int count, ...)
 {
+    
     va_list args;
     va_start(args, count);
     char * command[count+1];
@@ -84,6 +116,46 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     // and may be removed
     command[count] = command[count];
 
+    int fd = open( outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) { 
+        exit(1);
+    }
+    
+    int status;
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        close(fd);
+        return false;
+    }
+    else if (pid == 0) { 
+        if (dup2(fd, 1) < 0) {
+            close(fd);
+            exit(1);
+        }      
+        execv(command[0], command); 
+        exit(1);
+        return true;
+    }
+    else if (pid > 0) {
+        waitpid (pid, &status, 0);
+        if (WEXITSTATUS (status) == 0){
+            close(fd);
+            return true;
+        }
+        else {
+            close(fd);
+            return false;
+        }
+    }
+    else {
+        close(fd);
+        return false;
+    }
+
+
+
+    /* do whatever the parent wants to do. */
 
 /*
  * TODO
