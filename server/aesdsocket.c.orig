@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <syslog.h>
+
+#define PORT 9000  // the port users will be connecting to
+#define OUTPUT_FILE "/var/tmp/aesdsocketdata"
+#define BUFFER_SIZE = 2048
+
+void sigchld_handler(int s)
+{
+    if (s == SIGINT || s == SIGTERM)
+    { 
+        syslog(LOG_INFO, "Caught signal, exiting\n");
+        remove(OUTPUT_FILE);
+        shutdown(s, SHUT_RDWR);
+        exit(1);
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    signal(SIGINT, sigchld_handler);
+    signal(SIGTERM, sigchld_handler);
+    
+    
+    openlog(NULL, 0 ,LOG_USER);
+    //start by checking if daemon mode.
+
+   while((opt = getopt(argc, argv, “:g”)) != -1) 
+    { 
+        switch(opt) 
+        { 
+            case ‘d’: 
+                int is_daemon = 1;
+                break
+            case ‘?’: 
+                printf(“unknown option: %c\n”, optopt);
+                break; 
+        } 
+    }
+    //open socket
+    //int server_fd, new_socket, valread;
+    //int server_fd, new_socket;
+    //struct sockaddr_in address;
+    //int opt = 1;
+    //int addrlen = sizeof(address);
+    //char buffer[1024] = { 0 };
+    //char* hello = "Hello from server";
+    //// Creating socket file descriptor
+    //if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    //    exit(1);
+    //}
+    //    // Forcefully attaching socket to the port 8080
+    //if (setsockopt(server_fd, SOL_SOCKET,
+    //               SO_REUSEADDR | SO_REUSEPORT, &opt,
+    //               sizeof(opt))) {
+    //    exit(1);
+    //}
+    //address.sin_family = AF_INET;
+    //address.sin_addr.s_addr = INADDR_ANY;
+    //address.sin_port = htons(PORT);
+    //
+    //syslog(LOG_INFO,"Accepted connection from ");
+    //
+    ////syslog(LOG_ERR, "Invalid number of arguments %d.", argc);
+    ////log to syslog
+    ////Accepted connection from xxx
+//
+//
+    ////write all incoming data to OUTPUT_FILE
+//
+    ////once data is received return full value of OUTPUT_FILE
+    //
+    ////log to syslog
+    ////Closed connection from XXX
+//
+    ////handle signal interrupts SIGINT or SIGTERM
+    ////log to syslog
+    ////Caught signal, exiting
+//
+    //// Forcefully attaching socket to the port 8080
+    //if (bind(server_fd, (struct sockaddr*)&address,
+    //         sizeof(address))
+    //    < 0) {
+    //    perror("bind failed");
+    //    exit(1);
+    //}
+    //if (listen(server_fd, 3) < 0) {
+    //    perror("listen");
+    //    exit(1);
+    //}
+    //if ((new_socket
+    //     = accept(server_fd, (struct sockaddr*)&address,
+    //              (socklen_t*)&addrlen))
+    //    < 0) {
+    //    perror("accept");
+    //    exit(1);
+    //}
+//
+    ////valread = read(new_socket, buffer, 1024);
+    //printf("%s\n", buffer);
+    //send(new_socket, hello, strlen(hello), 0);
+    //printf("Hello message sent\n");
+  //
+    //// closing the connected socket
+    //close(new_socket);
+    //// closing the listening socket
+    //shutdown(server_fd, SHUT_RDWR);
+    //return 0;
+    //
+}//
